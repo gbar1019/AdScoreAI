@@ -3,86 +3,74 @@
 import { ConvexHttpClient } from "convex/browser";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
-import { getScoringProvider } from "@/lib/ai";
-import type { ScoreCreativeInput } from "@/lib/ai/types";
+import type { ContentType } from "@/types/score";
+import { runUnifiedSimulation } from "@/lib/simulation/fusion";
 
-function parseCreative(job: {
-  contentType: "image" | "email";
+function parseInput(job: {
+  contentType: ContentType;
   inputReference: string;
-}): ScoreCreativeInput {
+}): string {
   if (job.contentType === "image") {
-    return { kind: "image", imageUrl: job.inputReference };
+    return job.inputReference;
   }
-  const data = JSON.parse(job.inputReference) as {
-    subject: string;
-    body: string;
-    previewText?: string;
-  };
-  return {
-    kind: "email",
-    subject: data.subject,
-    body: data.body,
-    previewText: data.previewText,
-  };
+  return job.inputReference;
 }
 
 export async function runScoreJobAction(jobId: Id<"scoreJobs">) {
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL;
-  if (!url) throw new Error("NEXT_PUBLIC_CONVEX_URL is not set");
+  try {
+    const url = process.env.NEXT_PUBLIC_CONVEX_URL;
+    if (!url) throw new Error("NEXT_PUBLIC_CONVEX_URL is not set");
 
-  const client = new ConvexHttpClient(url);
+    const client = new ConvexHttpClient(url);
 
-  const job = await client.query(api.jobs.get, { jobId });
-  if (!job) throw new Error("Job not found");
+    const job = await client.query(api.jobs.get, { jobId });
+    if (!job) throw new Error("Job not found");
 
-  let audienceDescription = job.audienceSummary ?? "General audience";
-  if (job.audienceId) {
-    const audience = await client.query(api.audiences.get, {
-      id: job.audienceId,
-    });
-    if (audience) {
-      audienceDescription = `${audience.name}: ${audience.description}`;
+    let audienceDescription = job.audienceSummary ?? "General audience";
+    if (job.audienceId) {
+      const audience = await client.query(api.audiences.get, {
+        id: job.audienceId,
+      });
+      if (audience) {
+        audienceDescription = `${audience.name}: ${audience.description}`;
+      }
     }
-  }
 
-  await client.mutation(api.jobs.setStatus, {
-    jobId,
-    status: "processing",
-  });
-
-  const provider = getScoringProvider();
-  const creative = parseCreative(job);
-
-  const outcome = await provider.scoreCreative({
-    creative,
-    audience: { description: audienceDescription },
-    provider: "anthropic",
-  });
-
-  if (!outcome.ok) {
     await client.mutation(api.jobs.setStatus, {
       jobId,
-      status: "failed",
-      errorMessage: outcome.error,
+      status: "processing",
     });
-    return { ok: false as const, error: outcome.error };
+
+    const simulation = await runUnifiedSimulation({
+      contentType: job.contentType,
+      inputReference: parseInput(job),
+      audienceSummary: audienceDescription,
+    });
+    await client.mutation(api.results.save, {
+      jobId,
+      overallScore: simulation.overallScore,
+      confidence: simulation.confidence,
+      dimensions: simulation.dimensions,
+      personas: simulation.personas,
+      recommendations: simulation.recommendations,
+      kpiForecast: simulation.kpiForecast,
+      engineOutputs: simulation.engineOutputs,
+      engineContributions: simulation.engineContributions,
+      simulationVersion: simulation.simulationVersion,
+      normalizationMetadata: simulation.normalizationMetadata,
+      rawResponse: JSON.stringify(simulation.engineOutputs),
+    });
+
+    await client.mutation(api.jobs.setStatus, {
+      jobId,
+      status: "completed",
+    });
+
+    return { ok: true as const };
+  } catch (error) {
+    return {
+      ok: false as const,
+      error: error instanceof Error ? error.message : "Simulation failed",
+    };
   }
-
-  const r = outcome.result;
-  await client.mutation(api.results.save, {
-    jobId,
-    overallScore: r.score,
-    confidence: r.confidence,
-    dimensions: r.dimensions,
-    personas: r.personas,
-    recommendations: r.recommendations,
-    rawResponse: outcome.rawText,
-  });
-
-  await client.mutation(api.jobs.setStatus, {
-    jobId,
-    status: "completed",
-  });
-
-  return { ok: true as const };
 }

@@ -41,7 +41,7 @@ export function HistoryClient() {
                 <div>
                   <p className="font-medium tabular-nums">Score {r.overallScore}</p>
                   <p className="text-xs text-muted-foreground">
-                    {new Date(r.createdAt).toLocaleString()}
+                    {new Date(r.createdAt).toLocaleString()} · {r.simulationVersion}
                   </p>
                 </div>
                 <Link href={`/results/${r.jobId}`}>

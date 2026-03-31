@@ -11,7 +11,14 @@ export default defineSchema({
   }).index("by_createdAt", ["createdAt"]),
 
   scoreJobs: defineTable({
-    contentType: v.union(v.literal("image"), v.literal("email")),
+    contentType: v.union(
+      v.literal("image"),
+      v.literal("email"),
+      v.literal("sms"),
+      v.literal("paidAds"),
+      v.literal("push"),
+      v.literal("fileAsset"),
+    ),
     inputReference: v.string(),
     audienceId: v.optional(v.id("audiences")),
     audienceSummary: v.optional(v.string()),
@@ -36,6 +43,11 @@ export default defineSchema({
     dimensions: v.any(),
     personas: v.any(),
     recommendations: v.array(v.string()),
+    kpiForecast: v.any(),
+    engineOutputs: v.any(),
+    engineContributions: v.any(),
+    simulationVersion: v.string(),
+    normalizationMetadata: v.any(),
     rawResponse: v.optional(v.string()),
     createdAt: v.number(),
   })
@@ -43,9 +55,17 @@ export default defineSchema({
     .index("by_createdAt", ["createdAt"]),
 
   comparisonRuns: defineTable({
-    contentType: v.union(v.literal("image"), v.literal("email")),
+    contentType: v.union(
+      v.literal("image"),
+      v.literal("email"),
+      v.literal("sms"),
+      v.literal("paidAds"),
+      v.literal("push"),
+      v.literal("fileAsset"),
+    ),
     jobIds: v.array(v.id("scoreJobs")),
     rankedResults: v.any(),
+    simulationMetadata: v.optional(v.any()),
     createdAt: v.number(),
   }).index("by_createdAt", ["createdAt"]),
 

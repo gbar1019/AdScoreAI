@@ -10,7 +10,15 @@ import { ScoreSummaryCard } from "@/components/score-summary-card";
 import { DimensionScorePanel } from "@/components/dimension-score-panel";
 import { PersonaFeedbackList } from "@/components/persona-feedback-list";
 import { RecommendationsPanel } from "@/components/recommendations-panel";
-import type { PersonaFeedback, ScoreDimensions } from "@/types/score";
+import { KpiForecastPanel } from "@/components/kpi-forecast-panel";
+import { EngineContributionPanel } from "@/components/engine-contribution-panel";
+import { PersonaSimulationMatrix } from "@/components/persona-simulation-matrix";
+import type {
+  EngineContribution,
+  KpiForecast,
+  PersonaFeedback,
+  ScoreDimensions,
+} from "@/types/score";
 
 export function ResultsClient({ jobId }: { jobId: Id<"scoreJobs"> }) {
   const job = useQuery(api.jobs.get, { jobId });
@@ -30,6 +38,9 @@ export function ResultsClient({ jobId }: { jobId: Id<"scoreJobs"> }) {
 
   const dimensions = result?.dimensions as ScoreDimensions | undefined;
   const personas = result?.personas as PersonaFeedback[] | undefined;
+  const kpiForecast = result?.kpiForecast as KpiForecast | undefined;
+  const engineContributions =
+    result?.engineContributions as EngineContribution[] | undefined;
 
   return (
     <div className="space-y-6">
@@ -59,8 +70,15 @@ export function ResultsClient({ jobId }: { jobId: Id<"scoreJobs"> }) {
             confidence={result.confidence}
           />
           <DimensionScorePanel dimensions={dimensions} />
+          {kpiForecast ? <KpiForecastPanel forecast={kpiForecast} /> : null}
+          {engineContributions ? (
+            <EngineContributionPanel contributions={engineContributions} />
+          ) : null}
           <div className="lg:col-span-2">
             <PersonaFeedbackList personas={personas} />
+          </div>
+          <div className="lg:col-span-2">
+            <PersonaSimulationMatrix personas={personas} />
           </div>
           <div className="lg:col-span-2">
             <RecommendationsPanel recommendations={result.recommendations} />

@@ -21,9 +21,17 @@ export const listMine = query({
 
 export const create = mutation({
   args: {
-    contentType: v.union(v.literal("image"), v.literal("email")),
+    contentType: v.union(
+      v.literal("image"),
+      v.literal("email"),
+      v.literal("sms"),
+      v.literal("paidAds"),
+      v.literal("push"),
+      v.literal("fileAsset"),
+    ),
     jobIds: v.array(v.id("scoreJobs")),
     rankedResults: v.any(),
+    simulationMetadata: v.optional(v.any()),
   },
   handler: async (ctx, args) => {
     if (args.jobIds.length < 2) {
@@ -47,6 +55,7 @@ export const create = mutation({
       contentType: args.contentType,
       jobIds: args.jobIds,
       rankedResults: args.rankedResults,
+      simulationMetadata: args.simulationMetadata,
       createdAt: Date.now(),
     });
   },

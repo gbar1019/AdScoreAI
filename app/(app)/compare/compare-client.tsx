@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import type { Id } from "@/convex/_generated/dataModel";
+import type { ContentType } from "@/types/score";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,7 +45,7 @@ export function CompareClient() {
     const types = new Set(selectedPairs.map((p) => p.job.contentType));
     if (types.size === 0) return null;
     if (types.size > 1) return "mixed" as const;
-    return [...types][0] as "image" | "email";
+    return [...types][0] as ContentType;
   }, [selectedPairs]);
 
   async function handleCompare() {
@@ -53,7 +54,7 @@ export function CompareClient() {
       return;
     }
     if (contentType === "mixed" || !contentType) {
-      setError("All selected items must be the same type (image or email).");
+      setError("All selected items must be the same content type.");
       return;
     }
     setError(null);
@@ -68,12 +69,20 @@ export function CompareClient() {
         overallScore: p.result.overallScore,
         confidence: p.result.confidence,
         contentType: p.job.contentType,
+        simulationVersion: p.result.simulationVersion,
       }));
       const jobIds = sorted.map((p) => p.job._id as Id<"scoreJobs">);
       const id = await createComparison({
         contentType,
         jobIds,
         rankedResults,
+        simulationMetadata: {
+          contentType,
+          runCount: sorted.length,
+          simulationVersions: Array.from(
+            new Set(sorted.map((p) => p.result.simulationVersion)),
+          ),
+        },
       });
       router.push(`/compare/${id}`);
     } catch (e) {
@@ -107,7 +116,7 @@ export function CompareClient() {
               {selected.size} selected ·{" "}
               {contentType === "mixed" ? (
                 <span className="text-amber-600 dark:text-amber-400">
-                  Mixed types — pick only image or only email.
+                  Mixed types — pick one channel type.
                 </span>
               ) : contentType ? (
                 <span className="capitalize">{contentType} only</span>

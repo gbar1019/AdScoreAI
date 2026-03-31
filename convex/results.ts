@@ -51,6 +51,11 @@ export const save = mutation({
     dimensions: v.any(),
     personas: v.any(),
     recommendations: v.array(v.string()),
+    kpiForecast: v.any(),
+    engineOutputs: v.any(),
+    engineContributions: v.any(),
+    simulationVersion: v.string(),
+    normalizationMetadata: v.any(),
     rawResponse: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -69,6 +74,11 @@ export const save = mutation({
       dimensions: args.dimensions,
       personas: args.personas,
       recommendations: args.recommendations,
+      kpiForecast: args.kpiForecast,
+      engineOutputs: args.engineOutputs,
+      engineContributions: args.engineContributions,
+      simulationVersion: args.simulationVersion,
+      normalizationMetadata: args.normalizationMetadata,
       rawResponse: args.rawResponse,
       createdAt: Date.now(),
     };

@@ -20,6 +20,7 @@ type RankedRow = {
   overallScore: number;
   confidence?: number;
   contentType?: string;
+  simulationVersion?: string;
 };
 
 export function CompareDetailClient({
@@ -55,6 +56,7 @@ export function CompareDetailClient({
             {" · "}
             {run.jobIds.length} variants ·{" "}
             {new Date(run.createdAt).toLocaleString()}
+            {run.simulationMetadata ? " · Unified simulation metadata attached" : ""}
           </p>
         </div>
         <Link href="/compare">
@@ -90,7 +92,7 @@ export function CompareDetailClient({
                     </p>
                     {row.confidence != null ? (
                       <p className="text-xs text-muted-foreground">
-                        Confidence {row.confidence}%
+                        Confidence {row.confidence}%{row.simulationVersion ? ` · ${row.simulationVersion}` : ""}
                       </p>
                     ) : null}
                   </div>

@@ -3,7 +3,14 @@ import { v } from "convex/values";
 
 export const create = mutation({
   args: {
-    contentType: v.union(v.literal("image"), v.literal("email")),
+    contentType: v.union(
+      v.literal("image"),
+      v.literal("email"),
+      v.literal("sms"),
+      v.literal("paidAds"),
+      v.literal("push"),
+      v.literal("fileAsset"),
+    ),
     inputReference: v.string(),
     audienceId: v.optional(v.id("audiences")),
     audienceSummary: v.optional(v.string()),

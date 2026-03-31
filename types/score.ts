@@ -26,7 +26,35 @@ export type ScoringResultPayload = {
   recommendations: string[];
 };
 
-export type ContentType = "image" | "email";
+export type KpiBand = {
+  p10: number;
+  p50: number;
+  p90: number;
+};
+
+export type KpiForecast = {
+  views: KpiBand;
+  likes: KpiBand;
+  comments: KpiBand;
+  shares: KpiBand;
+  engagementRate: KpiBand;
+  ctr: KpiBand;
+  conversionIntent: KpiBand;
+};
+
+export type EngineContribution = {
+  engine: string;
+  weight: number;
+  byKpi: Record<keyof KpiForecast, number>;
+};
+
+export type ContentType =
+  | "image"
+  | "email"
+  | "sms"
+  | "paidAds"
+  | "push"
+  | "fileAsset";
 
 export type AiProviderId = "anthropic";
 
