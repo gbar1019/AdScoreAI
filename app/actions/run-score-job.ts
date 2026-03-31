@@ -50,13 +50,13 @@ export async function runScoreJobAction(jobId: Id<"scoreJobs">) {
     status: "processing",
   });
 
-  const provider = getScoringProvider(job.provider);
+  const provider = getScoringProvider();
   const creative = parseCreative(job);
 
   const outcome = await provider.scoreCreative({
     creative,
     audience: { description: audienceDescription },
-    provider: job.provider,
+    provider: "anthropic",
   });
 
   if (!outcome.ok) {

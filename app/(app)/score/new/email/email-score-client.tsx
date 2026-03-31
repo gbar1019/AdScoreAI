@@ -16,7 +16,6 @@ import {
 import { AudienceBuilder } from "@/components/audience-builder";
 import { EmailInputForm } from "@/components/email-input-form";
 import { runScoreJobAction } from "@/app/actions/run-score-job";
-import type { AiProviderId } from "@/types/score";
 
 export function EmailScoreClient() {
   const router = useRouter();
@@ -28,7 +27,6 @@ export function EmailScoreClient() {
     body: "",
   });
   const [audience, setAudience] = useState({ name: "", description: "" });
-  const [provider, setProvider] = useState<AiProviderId>("openai");
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -53,7 +51,6 @@ export function EmailScoreClient() {
       const jobId = await createJob({
         contentType: "email",
         inputReference,
-        provider,
         audienceSummary: summary,
       });
 
@@ -97,24 +94,6 @@ export function EmailScoreClient() {
       </Card>
 
       <AudienceBuilder value={audience} onChange={setAudience} />
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Model provider</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Label htmlFor="provider">Provider</Label>
-          <select
-            id="provider"
-            className="flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm shadow-sm"
-            value={provider}
-            onChange={(e) => setProvider(e.target.value as AiProviderId)}
-          >
-            <option value="openai">OpenAI</option>
-            <option value="anthropic">Anthropic</option>
-          </select>
-        </CardContent>
-      </Card>
 
       <Button
         type="button"

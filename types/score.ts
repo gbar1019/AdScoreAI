@@ -28,7 +28,7 @@ export type ScoringResultPayload = {
 
 export type ContentType = "image" | "email";
 
-export type AiProviderId = "openai" | "anthropic";
+export type AiProviderId = "anthropic";
 
 export type JobStatus = "queued" | "processing" | "completed" | "failed";
 

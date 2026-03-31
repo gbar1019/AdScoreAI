@@ -16,7 +16,6 @@ import {
 import { AudienceBuilder } from "@/components/audience-builder";
 import { ContentUploadForm } from "@/components/content-upload-form";
 import { runScoreJobAction } from "@/app/actions/run-score-job";
-import type { AiProviderId } from "@/types/score";
 
 export function ImageScoreClient() {
   const router = useRouter();
@@ -25,7 +24,6 @@ export function ImageScoreClient() {
 
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [audience, setAudience] = useState({ name: "", description: "" });
-  const [provider, setProvider] = useState<AiProviderId>("openai");
   const [savingAudience, setSavingAudience] = useState(false);
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -61,7 +59,6 @@ export function ImageScoreClient() {
       const jobId = await createJob({
         contentType: "image",
         inputReference: imageUrl,
-        provider,
         audienceSummary: summary,
       });
 
@@ -100,7 +97,12 @@ export function ImageScoreClient() {
           <CardDescription>PNG or JPG up to 8MB (UploadThing).</CardDescription>
         </CardHeader>
         <CardContent>
-          <ContentUploadForm onUploaded={setImageUrl} />
+          <ContentUploadForm
+            onUploaded={(url) => {
+              setImageUrl(url);
+              setError(null);
+            }}
+          />
           {imageUrl ? (
             <p className="mt-2 truncate text-xs text-muted-foreground">
               {imageUrl}
@@ -118,27 +120,15 @@ export function ImageScoreClient() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Model provider</CardTitle>
-          <CardDescription>OpenAI or Anthropic via abstraction layer.</CardDescription>
+          <CardTitle>Scoring</CardTitle>
+          <CardDescription>Runs automatically with Anthropic.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-2">
-          <Label htmlFor="provider">Provider</Label>
-          <select
-            id="provider"
-            className="flex h-9 w-full rounded-md border border-border bg-transparent px-3 py-1 text-sm shadow-sm"
-            value={provider}
-            onChange={(e) => setProvider(e.target.value as AiProviderId)}
-          >
-            <option value="openai">OpenAI</option>
-            <option value="anthropic">Anthropic</option>
-          </select>
-        </CardContent>
       </Card>
 
       <Button
         type="button"
         className="w-full"
-        disabled={running}
+        disabled={running || !imageUrl}
         onClick={() => void handleRun()}
       >
         {running ? "Scoring…" : "Create job & score"}

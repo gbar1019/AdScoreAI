@@ -7,7 +7,6 @@ export const create = mutation({
     inputReference: v.string(),
     audienceId: v.optional(v.id("audiences")),
     audienceSummary: v.optional(v.string()),
-    provider: v.union(v.literal("openai"), v.literal("anthropic")),
   },
   handler: async (ctx, args) => {
     const now = Date.now();
@@ -17,7 +16,7 @@ export const create = mutation({
       audienceId: args.audienceId,
       audienceSummary: args.audienceSummary,
       status: "queued",
-      provider: args.provider,
+      provider: "anthropic",
       createdAt: now,
       updatedAt: now,
     });

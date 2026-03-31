@@ -21,7 +21,7 @@ export default defineSchema({
       v.literal("completed"),
       v.literal("failed"),
     ),
-    provider: v.union(v.literal("openai"), v.literal("anthropic")),
+    provider: v.literal("anthropic"),
     errorMessage: v.optional(v.string()),
     createdAt: v.number(),
     updatedAt: v.number(),

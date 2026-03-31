@@ -13,7 +13,10 @@ export function ContentUploadForm({
       <UploadButton<OurFileRouter, "imageUploader">
         endpoint="imageUploader"
         onClientUploadComplete={(res) => {
-          const url = res?.[0]?.url;
+          const first = res?.[0] as
+            | { url?: string; ufsUrl?: string; serverData?: { url?: string } }
+            | undefined;
+          const url = first?.url ?? first?.serverData?.url ?? first?.ufsUrl;
           if (url) onUploaded(url);
         }}
         onUploadError={(e) => {

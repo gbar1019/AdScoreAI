@@ -26,8 +26,10 @@ export function createAnthropicScoringProvider(): ScoringProvider {
       }
       const client = new Anthropic({ apiKey: key });
       try {
+        const model =
+          process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6";
         const msg = await client.messages.create({
-          model: "claude-3-5-sonnet-20241022",
+          model,
           max_tokens: 2048,
           messages: [{ role: "user", content: buildUserText(request) }],
         });
